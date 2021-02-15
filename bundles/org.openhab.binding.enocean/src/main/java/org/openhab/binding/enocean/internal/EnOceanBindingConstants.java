@@ -64,6 +64,7 @@ public class EnOceanBindingConstants {
     public static final ThingTypeUID THING_TYPE_AUTOMATEDMETERSENSOR = new ThingTypeUID(BINDING_ID,
             "automatedMeterSensor");
     public static final ThingTypeUID THING_TYPE_THERMOSTAT = new ThingTypeUID(BINDING_ID, "thermostat");
+    public static final ThingTypeUID THING_TYPE_VENTILATION_UNIT = new ThingTypeUID(BINDING_ID, "ventilationUnit");
     public static final ThingTypeUID THING_TYPE_OCCUPANCYSENSOR = new ThingTypeUID(BINDING_ID, "occupancySensor");
     public static final ThingTypeUID THING_TYPE_LIGHTTEMPERATUREOCCUPANCYSENSOR = new ThingTypeUID(BINDING_ID,
             "lightTemperatureOccupancySensor");
@@ -84,7 +85,7 @@ public class EnOceanBindingConstants {
             THING_TYPE_TEMPERATUREHUMIDITYSENSOR, THING_TYPE_GENERICTHING, THING_TYPE_ROLLERSHUTTER,
             THING_TYPE_OCCUPANCYSENSOR, THING_TYPE_LIGHTTEMPERATUREOCCUPANCYSENSOR, THING_TYPE_LIGHTSENSOR,
             THING_TYPE_ENVIRONMENTALSENSOR, THING_TYPE_AUTOMATEDMETERSENSOR, THING_TYPE_THERMOSTAT,
-            THING_TYPE_MULTFUNCTIONSMOKEDETECTOR, THING_TYPE_HEATRECOVERYVENTILATION);
+            THING_TYPE_VENTILATION_UNIT, THING_TYPE_MULTFUNCTIONSMOKEDETECTOR, THING_TYPE_HEATRECOVERYVENTILATION);
 
     // List of all Channel Type Ids, these type ids are also used as channel ids during dynamic creation of channels
     // this makes it a lot easier as we do not have to manage a type id and an id, drawback long channel names
@@ -178,6 +179,22 @@ public class EnOceanBindingConstants {
     public static final String CHANNEL_SERVICECOMMAND = "serviceCommand";
     public static final String CHANNEL_STATUS_REQUEST_EVENT = "statusRequestEvent";
     public static final String CHANNEL_SEND_COMMAND = "sendCommand";
+
+    public static final String CHANNEL_SPEEDSETTING = "speedSetting";
+    public static final String CHANNEL_ACTUALSPEEDTIMERSETTING = "actualSpeedTimerSetting";
+    public static final String CHANNEL_NODELOWBATTERY = "nodeLowBattery";
+    public static final String CHANNEL_NODECOMMUNICATIONERROR = "nodeCommunicationError";
+    public static final String CHANNEL_SENSORERROR = "sensorError";
+    public static final String CHANNEL_FANSPEEDERROR = "fanSpeedError";
+    public static final String CHANNEL_ERROR = "error";
+    public static final String CHANNEL_FILTERCONDITION = "filterCondition";
+    public static final String CHANNEL_AUTOSPEEDSUPPORT = "autoSpeedSupport";
+    public static final String CHANNEL_BYPASSACTIVE = "byPassActive";
+    public static final String CHANNEL_FROSTPROTECTION = "frostProtection";
+
+    public static final String CHANNEL_NEWSPEEDTIMERSETTING = "newSpeedTimerSetting";
+    public static final String CHANNEL_RESETERROR = "resetError";
+    public static final String CHANNEL_RESETFILTERTIMER = "resetFilterTimer";
 
     public static final String CHANNEL_VENTILATIONOPERATIONMODE = "ventilationOperationMode";
     public static final String CHANNEL_FIREPLACESAFETYMODE = "fireplaceSafetyMode";
@@ -449,6 +466,49 @@ public class EnOceanBindingConstants {
                             "", false, true)),
             Map.entry(CHANNEL_SEND_COMMAND,
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_SEND_COMMAND),
+                            CoreItemFactory.SWITCH)),
+
+            Map.entry(CHANNEL_SPEEDSETTING,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_SPEEDSETTING),
+                            CoreItemFactory.STRING)),
+            Map.entry(CHANNEL_ACTUALSPEEDTIMERSETTING,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_ACTUALSPEEDTIMERSETTING),
+                            CoreItemFactory.NUMBER)),
+            Map.entry(CHANNEL_NODELOWBATTERY,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_NODELOWBATTERY),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_NODECOMMUNICATIONERROR,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_NODECOMMUNICATIONERROR),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_SENSORERROR,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_SENSORERROR),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_FANSPEEDERROR,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_FANSPEEDERROR),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_ERROR,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_ERROR),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_FILTERCONDITION,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_FILTERCONDITION),
+                            CoreItemFactory.NUMBER)),
+            Map.entry(CHANNEL_AUTOSPEEDSUPPORT,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_AUTOSPEEDSUPPORT),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_BYPASSACTIVE,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_BYPASSACTIVE),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_FROSTPROTECTION,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_FROSTPROTECTION),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_NEWSPEEDTIMERSETTING,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_NEWSPEEDTIMERSETTING),
+                            CoreItemFactory.NUMBER)),
+            Map.entry(CHANNEL_RESETERROR,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_RESETERROR),
+                            CoreItemFactory.SWITCH)),
+            Map.entry(CHANNEL_RESETFILTERTIMER,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_RESETFILTERTIMER),
                             CoreItemFactory.SWITCH)),
 
             Map.entry(CHANNEL_VENTILATIONOPERATIONMODE,

@@ -759,4 +759,142 @@
 		<state min="0" max="100" pattern="%.1f rpm" readOnly="true"/>
 	</channel-type>
 
+	<channel-type id="speedSetting">
+		<item-type>String</item-type>
+		<label>Actual speed setting</label>
+		<description>Actual speed setting of ventilation unit</description>
+		<category>thermostat</category>
+		<state>
+			<options>
+				<option value="MIN">Minimum speed / away</option>
+				<option value="LOW">Speed 1 / low</option>
+				<option value="MID">Speed 2 / mid</option>
+				<option value="HIGH">Speed 3 / high</option>
+				<option value="MAX">Max speed</option>
+				<option value="AUTO">Auto</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="actualSpeedTimerSetting">
+		<item-type>Number:Minute</item-type>
+		<label>Actual speed timer setting</label>
+		<description>Actual timer value for actual speed</description>
+		<state readOnly="true">
+			<options>
+				<option value="0">No timer set or expired</option>
+				<option value="1">1..10 min left</option>
+				<option value="2">11..20 min left</option>
+				<option value="3">21..30 min left</option>
+				<option value="4">31..40 min left</option>
+				<option value="5">41..50 min left</option>
+				<option value="6">51..60 min left</option>
+				<option value="7">&gt; 60 min left</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="newSpeedTimerSetting">
+		<item-type>Number:Minute</item-type>
+		<label>New speed timer setting</label>
+		<description>Timer setting for new speed</description>
+		<state readOnly="true">
+			<options>
+				<option value="0">No timer / no change</option>
+				<option value="1">10</option>
+				<option value="2">20</option>
+				<option value="3">30</option>
+				<option value="4">40</option>
+				<option value="5">50</option>
+				<option value="6">60</option>
+				<option value="7">120</option>
+				<option value="8">180</option>
+				<option value="9">240</option>
+				<option value="10">300</option>
+				<option value="11">360</option>
+				<option value="12">420</option>
+				<option value="13">480</option>
+				<option value="14">540</option>
+				<option value="15">600</option>
+				<option value="16">660</option>
+				<option value="17">720</option>
+				<option value="18">780</option>
+				<option value="19">840</option>
+				<option value="20">900</option>
+				<option value="21">960</option>
+				<option value="22">1020</option>
+				<option value="23">1080</option>
+				<option value="24">1140</option>
+				<option value="25">1200</option>
+				<option value="26">1260</option>
+				<option value="27">1320</option>
+				<option value="28">1380</option>
+				<option value="29">1440</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="nodeLowBattery" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Node low battery</label>
+		<description>External node low battery error</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="nodeCommunicationError" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Node comm. error</label>
+		<description>External node communication error</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="sensorError" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Sensor error</label>
+		<description>Internal sensor error</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="fanSpeedError" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Fan speed error</label>
+		<description>Desired fan speed not reached error</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="error" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Error</label>
+		<description>Unit has an error</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="filterCondition">
+		<item-type>Number:Percent</item-type>
+		<label>Filter condition</label>
+		<description>Air quality value of second sensor in percentages</description>
+		<state min="0" max="100" pattern="%d %unit%" readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="byPassActive" advanced="true">
+		<item-type>Switch</item-type>
+		<label>By-pass active</label>
+		<description>Summer bypass active or not</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="frostProtection" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Frost protection</label>
+		<description>Frost protection active or not</description>
+		<category>Switch</category>
+		<state readOnly="true"/>
+	</channel-type>
+
 </thing:thing-descriptions>

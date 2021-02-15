@@ -103,6 +103,7 @@ import org.openhab.binding.enocean.internal.eep.A5_14.A5_14_01_ELTAKO;
 import org.openhab.binding.enocean.internal.eep.A5_14.A5_14_09;
 import org.openhab.binding.enocean.internal.eep.A5_14.A5_14_0A;
 import org.openhab.binding.enocean.internal.eep.A5_20.A5_20_04;
+import org.openhab.binding.enocean.internal.eep.A5_20.A5_20_05;
 import org.openhab.binding.enocean.internal.eep.A5_30.A5_30_03_ELTAKO;
 import org.openhab.binding.enocean.internal.eep.A5_38.A5_38_08_Blinds;
 import org.openhab.binding.enocean.internal.eep.A5_38.A5_38_08_Dimming;
@@ -408,6 +409,12 @@ public enum EEPType {
             CHANNEL_BUTTON_LOCK, CHANNEL_DISPLAY_ORIENTATION, CHANNEL_TEMPERATURE_SETPOINT, CHANNEL_TEMPERATURE,
             CHANNEL_FEED_TEMPERATURE, CHANNEL_MEASUREMENT_CONTROL, CHANNEL_FAILURE_CODE, CHANNEL_WAKEUPCYCLE,
             CHANNEL_SERVICECOMMAND, CHANNEL_STATUS_REQUEST_EVENT, CHANNEL_SEND_COMMAND),
+
+    VentilationUnit(RORG._4BS, 0x20, 0x05, false, A5_20_05.class, THING_TYPE_VENTILATION_UNIT, CHANNEL_SPEEDSETTING,
+            CHANNEL_ACTUALSPEEDTIMERSETTING, CHANNEL_NODELOWBATTERY, CHANNEL_NODECOMMUNICATIONERROR,
+            CHANNEL_SENSORERROR, CHANNEL_FANSPEEDERROR, CHANNEL_ERROR, CHANNEL_FILTERCONDITION,
+            CHANNEL_AUTOSPEEDSUPPORT, CHANNEL_BYPASSACTIVE, CHANNEL_FROSTPROTECTION, CHANNEL_NEWSPEEDTIMERSETTING,
+            CHANNEL_RESETERROR, CHANNEL_RESETFILTERTIMER),
 
     SwitchWithEnergyMeasurment_00(RORG.VLD, 0x01, 0x00, true, D2_01_00.class, THING_TYPE_MEASUREMENTSWITCH,
             CHANNEL_GENERAL_SWITCHING, CHANNEL_TOTALUSAGE),
