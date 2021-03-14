@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,7 @@ import static org.openhab.binding.veluxklf200.internal.VeluxKLF200BindingConstan
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.veluxklf200.internal.VeluxKLF200BindingConstants;
 import org.openhab.binding.veluxklf200.internal.VeluxKLF200Configuration;
@@ -54,12 +55,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author MFK - Initial Contribution
  */
+@NonNullByDefault
 public class KLF200BridgeHandler extends BaseBridgeHandler implements KLFEventListener {
 
     /** The logger. */
     private Logger logger = LoggerFactory.getLogger(KLF200BridgeHandler.class);
 
     /** Reference to the CommandProcessor that is setup and initialised at startup */
+    @Nullable
     private KLFCommandProcessor klf200;
 
     /**
@@ -157,19 +160,17 @@ public class KLF200BridgeHandler extends BaseBridgeHandler implements KLFEventLi
      * See {@link initialize()} comments for further information.
      */
     private void refreshKnownDevices() {
-        if (this.klf200 != null) {
+        KLFCommandProcessor klfProcessor = this.klf200;
+        if (klfProcessor != null) {
             logger.debug("Refreshing all KLF200 devices");
             List<Thing> things = getThing().getThings();
             for (Thing t : things) {
-                if (t == null) {
-                    continue;
-                }
                 // Refresh all vertical interior blinds
                 if (THING_TYPE_VELUX_BLIND.equals(t.getThingTypeUID())
                         || THING_TYPE_VELUX_SHUTTER.equals(t.getThingTypeUID())) {
                     logger.debug("Refreshing {} with Id {}", t, t.getUID().getId());
                     KlfCmdGetNode node = new KlfCmdGetNode((byte) Integer.valueOf(t.getUID().getId()).intValue());
-                    this.klf200.executeCommand(node);
+                    klfProcessor.executeCommand(node);
                     VeluxNode veluxNode = node.getNode();
                     if (veluxNode != null && node.getCommandStatus() == CommandStatus.COMPLETE) {
                         t.setLabel(veluxNode.getName());
@@ -233,42 +234,47 @@ public class KLF200BridgeHandler extends BaseBridgeHandler implements KLFEventLi
         KlfCmdPing ping = new KlfCmdPing();
         KlfCmdSetTime time = new KlfCmdSetTime();
         KlfCmdEnableHomeStatusMonitor monitor = new KlfCmdEnableHomeStatusMonitor();
-        Map<String, String> properties = this.editProperties();
-        this.klf200.executeCommand(ver);
-        if (ver.getCommandStatus() == CommandStatus.COMPLETE) {
-            properties.put("Hardware Version", ver.getHardwareVersion());
-            properties.put("Software Version", ver.getSoftwareVersion());
-            properties.put("Product Group", ver.getProductGroup());
-            properties.put("Product Type", ver.getProductType());
-        } else {
-            logger.error("Unable to retrieve KLF20 Version Information: {}", ver.getCommandStatus().getErrorDetail());
-        }
-        this.klf200.executeCommand(proto);
-        if (proto.getCommandStatus() == CommandStatus.COMPLETE) {
-            properties.put("Protocol", proto.getProtocol());
-        } else {
-            logger.error("Unable to retrieve KLF20 Protocol Information: {}",
-                    proto.getCommandStatus().getErrorDetail());
-        }
-        this.klf200.executeCommand(ping);
-        if (ping.getCommandStatus() == CommandStatus.COMPLETE) {
-            properties.put("State", ping.getGatewayState());
-        } else {
-            logger.error("Unable to ping the KLF200: {}", ping.getCommandStatus().getErrorDetail());
-        }
-        this.updateProperties(properties);
-        this.klf200.executeCommand(time);
-        if (time.getCommandStatus() == CommandStatus.COMPLETE) {
-            logger.info("Time on the KLF200 updated to reflect current time on this system.");
-        } else {
-            logger.error("Unable to update the time on the KLF200: {}", time.getCommandStatus().getErrorDetail());
-        }
-        this.klf200.executeCommand(monitor);
-        if (monitor.getCommandStatus() == CommandStatus.COMPLETE) {
-            logger.info("Home status monitoring enabled.");
-        } else {
-            logger.error("Unable to enable the home status monitor on the KLF200: {}",
-                    monitor.getCommandStatus().getErrorDetail());
+
+        KLFCommandProcessor klfProcessor = this.klf200;
+        if (klfProcessor != null) {
+            Map<String, String> properties = this.editProperties();
+            klfProcessor.executeCommand(ver);
+            if (ver.getCommandStatus() == CommandStatus.COMPLETE) {
+                properties.put("Hardware Version", ver.getHardwareVersion());
+                properties.put("Software Version", ver.getSoftwareVersion());
+                properties.put("Product Group", ver.getProductGroup());
+                properties.put("Product Type", ver.getProductType());
+            } else {
+                logger.error("Unable to retrieve KLF20 Version Information: {}",
+                        ver.getCommandStatus().getErrorDetail());
+            }
+            klfProcessor.executeCommand(proto);
+            if (proto.getCommandStatus() == CommandStatus.COMPLETE) {
+                properties.put("Protocol", proto.getProtocol());
+            } else {
+                logger.error("Unable to retrieve KLF20 Protocol Information: {}",
+                        proto.getCommandStatus().getErrorDetail());
+            }
+            klfProcessor.executeCommand(ping);
+            if (ping.getCommandStatus() == CommandStatus.COMPLETE) {
+                properties.put("State", ping.getGatewayState());
+            } else {
+                logger.error("Unable to ping the KLF200: {}", ping.getCommandStatus().getErrorDetail());
+            }
+            this.updateProperties(properties);
+            klfProcessor.executeCommand(time);
+            if (time.getCommandStatus() == CommandStatus.COMPLETE) {
+                logger.info("Time on the KLF200 updated to reflect current time on this system.");
+            } else {
+                logger.error("Unable to update the time on the KLF200: {}", time.getCommandStatus().getErrorDetail());
+            }
+            klfProcessor.executeCommand(monitor);
+            if (monitor.getCommandStatus() == CommandStatus.COMPLETE) {
+                logger.info("Home status monitoring enabled.");
+            } else {
+                logger.error("Unable to enable the home status monitor on the KLF200: {}",
+                        monitor.getCommandStatus().getErrorDetail());
+            }
         }
     }
 
@@ -280,7 +286,9 @@ public class KLF200BridgeHandler extends BaseBridgeHandler implements KLFEventLi
     @Override
     public void dispose() {
         logger.debug("Disposing of bridge handler.");
-        this.klf200.shutdown();
+        if (this.klf200 != null) {
+            this.klf200.shutdown();
+        }
     }
 
     /**
