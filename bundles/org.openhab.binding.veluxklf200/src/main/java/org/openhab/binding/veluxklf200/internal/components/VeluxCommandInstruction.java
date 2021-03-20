@@ -28,9 +28,6 @@ public class VeluxCommandInstruction extends AbstractNodeInstruction {
      */
     private byte function;
 
-    /** Indicates the command / possition that should be sent to the function. */
-    private short position;
-
     /**
      * Instantiates a new velux command instruction.
      *
@@ -38,13 +35,10 @@ public class VeluxCommandInstruction extends AbstractNodeInstruction {
      *            the node id
      * @param function
      *            the function
-     * @param position
-     *            the position
      */
-    public VeluxCommandInstruction(byte nodeId, byte function, short position) {
+    public VeluxCommandInstruction(byte nodeId, byte function) {
         super(nodeId);
         this.function = function;
-        this.position = position;
     }
 
     /**
@@ -56,12 +50,4 @@ public class VeluxCommandInstruction extends AbstractNodeInstruction {
         return function;
     }
 
-    /**
-     * Gets the position.
-     *
-     * @return the position
-     */
-    public short getPosition() {
-        return position;
-    }
 }

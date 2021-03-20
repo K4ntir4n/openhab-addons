@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.veluxklf200.internal.commands.structure.KLFCommandCodes;
 import org.openhab.binding.veluxklf200.internal.commands.structure.KLFCommandStructure;
+import org.openhab.binding.veluxklf200.internal.components.PositionCommand;
 import org.openhab.binding.veluxklf200.internal.components.VeluxCommandInstruction;
 import org.openhab.binding.veluxklf200.internal.components.VeluxRunStatus;
 import org.openhab.binding.veluxklf200.internal.components.VeluxStatusReply;
@@ -58,11 +59,11 @@ public class KlfCmdSendCommand extends BaseKLFCommand {
      * @param nodeCommand
      *            the node command
      */
-    public KlfCmdSendCommand(byte nodeId, byte function, short nodeCommand) {
-        super();
-        this.commands = new ArrayList<VeluxCommandInstruction>();
-        commands.add(new VeluxCommandInstruction(nodeId, function, nodeCommand));
-    }
+    // public KlfCmdSendCommand(byte nodeId, byte function, short nodeCommand) {
+    // super();
+    // this.commands = new ArrayList<VeluxCommandInstruction>();
+    // commands.add(new VeluxCommandInstruction(nodeId, function, nodeCommand));
+    // }
 
     /**
      * Constructor varient that creates a command with a single instruction to
@@ -184,9 +185,23 @@ public class KlfCmdSendCommand extends BaseKLFCommand {
             // ParameterActive
             data[4] = cmd.getFunction();
 
-            // FunctionalParameterValueArray
-            data[7 + (counter * 2)] = (byte) (cmd.getPosition() >>> 8);
-            data[8 + (counter * 2)] = (byte) cmd.getPosition();
+            if (cmd instanceof PositionCommand) {
+                PositionCommand positionCommand = (PositionCommand) cmd;
+
+                Short speed = positionCommand.getSpeed();
+                // Functional parameter indicator FPI1 & FPI2
+                data[5] = (byte) (speed != null ? 128 : 0);
+                data[6] = 0;
+
+                // FunctionalParameterValueArray
+                data[7 + (counter * 2)] = (byte) (positionCommand.getPosition() >>> 8);
+                data[8 + (counter * 2)] = (byte) positionCommand.getPosition();
+
+                if (speed != null) {
+                    data[9] = (byte) (Short.valueOf(speed) >>> 8);
+                    data[10] = Short.valueOf(speed).byteValue();
+                }
+            }
 
             // IndexArray
             if (counter == 0) {

@@ -24,6 +24,7 @@ import org.openhab.binding.veluxklf200.internal.commands.CommandStatus;
 import org.openhab.binding.veluxklf200.internal.commands.KlfCmdGetNode;
 import org.openhab.binding.veluxklf200.internal.commands.KlfCmdSendCommand;
 import org.openhab.binding.veluxklf200.internal.commands.KlfCmdSetVelocity;
+import org.openhab.binding.veluxklf200.internal.components.PositionCommand;
 import org.openhab.binding.veluxklf200.internal.components.VeluxCommandInstruction;
 import org.openhab.binding.veluxklf200.internal.components.VeluxNode;
 import org.openhab.binding.veluxklf200.internal.components.VeluxPosition;
@@ -136,6 +137,8 @@ public class KLF200BlindHandler extends KLF200BaseThingHandler {
         } else {
             logger.debug("Handling blind state change command.");
             byte nodeId = (byte) Integer.valueOf(getThing().getUID().getId()).intValue();
+
+            short speed = VeluxPosition.setPercentOpen(99);
             switch (channelUID.getId()) {
                 case VeluxKLF200BindingConstants.VELUX_BLIND_POSITION:
                 case VeluxKLF200BindingConstants.VELUX_SHUTTER_POSITION:
@@ -147,7 +150,7 @@ public class KLF200BlindHandler extends KLF200BaseThingHandler {
                                 Integer.valueOf(channelUID.getThingUID().getId()), thing.getLabel());
 
                         List<VeluxCommandInstruction> instructions = new ArrayList<>();
-                        instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER, STOP_PARAMETER));
+                        instructions.add(new PositionCommand(nodeId, MAIN_PARAMETER, STOP_PARAMETER));
                         // instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER, (short) 53456));
                         KlfCmdSendCommand sendCmd = new KlfCmdSendCommand(instructions);
 
@@ -157,8 +160,8 @@ public class KLF200BlindHandler extends KLF200BaseThingHandler {
                             logger.debug("Closing blind Id:{} {}.", Integer.valueOf(channelUID.getThingUID().getId()),
                                     thing.getLabel());
                             List<VeluxCommandInstruction> instructions = new ArrayList<>();
-                            instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER,
-                                    VeluxPosition.setPercentOpen(0)));
+                            instructions.add(new PositionCommand(nodeId, MAIN_PARAMETER,
+                                    VeluxPosition.setPercentOpen(0), speed));
                             // instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER, (short) 53456));
                             KlfCmdSendCommand sendCmd = new KlfCmdSendCommand(instructions);
 
@@ -167,8 +170,8 @@ public class KLF200BlindHandler extends KLF200BaseThingHandler {
                             logger.debug("Opening blind Id:{} {}.", Integer.valueOf(channelUID.getThingUID().getId()),
                                     thing.getLabel());
                             List<VeluxCommandInstruction> instructions = new ArrayList<>();
-                            instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER,
-                                    VeluxPosition.setPercentOpen(100)));
+                            instructions.add(new PositionCommand(nodeId, MAIN_PARAMETER,
+                                    VeluxPosition.setPercentOpen(100), speed));
                             // instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER, (short) 53456));
                             KlfCmdSendCommand sendCmd = new KlfCmdSendCommand(instructions);
 
@@ -182,8 +185,8 @@ public class KLF200BlindHandler extends KLF200BaseThingHandler {
                                 percentType.doubleValue());
 
                         List<VeluxCommandInstruction> instructions = new ArrayList<>();
-                        instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER,
-                                VeluxPosition.setPercentClosed((int) percentType.doubleValue())));
+                        instructions.add(new PositionCommand(nodeId, MAIN_PARAMETER,
+                                VeluxPosition.setPercentClosed((int) percentType.doubleValue()), speed));
                         // instructions.add(new VeluxCommandInstruction(nodeId, MAIN_PARAMETER, (short) 53456));
                         KlfCmdSendCommand sendCmd = new KlfCmdSendCommand(instructions);
 
