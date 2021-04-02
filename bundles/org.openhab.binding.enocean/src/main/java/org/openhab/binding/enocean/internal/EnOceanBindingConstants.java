@@ -178,7 +178,7 @@ public class EnOceanBindingConstants {
     public static final String CHANNEL_WAKEUPCYCLE = "wakeUpCycle";
     public static final String CHANNEL_SERVICECOMMAND = "serviceCommand";
     public static final String CHANNEL_STATUS_REQUEST_EVENT = "statusRequestEvent";
-    public static final String CHANNEL_SEND_COMMAND = "sendCommand";
+    public static final String VIRTUALCHANNEL_SEND_COMMAND = "sendCommand";
 
     public static final String CHANNEL_SPEEDSETTING = "speedSetting";
     public static final String CHANNEL_ACTUALSPEEDTIMERSETTING = "actualSpeedTimerSetting";
@@ -310,7 +310,8 @@ public class EnOceanBindingConstants {
             Map.entry(CHANNEL_INDOORAIRANALYSIS,
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_INDOORAIRANALYSIS),
                             CoreItemFactory.STRING)),
-            Map.entry(CHANNEL_SETPOINT,
+            Map.entry(
+                    CHANNEL_SETPOINT,
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_SETPOINT),
                             CoreItemFactory.NUMBER)),
             Map.entry(CHANNEL_CONTACT,
@@ -461,6 +462,7 @@ public class EnOceanBindingConstants {
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_SERVICECOMMAND),
                             CoreItemFactory.NUMBER)),
 
+<<<<<<< HEAD
             Map.entry(CHANNEL_STATUS_REQUEST_EVENT,
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_STATUS_REQUEST_EVENT), null,
                             "", false, true)),
@@ -511,6 +513,8 @@ public class EnOceanBindingConstants {
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_RESETFILTERTIMER),
                             CoreItemFactory.SWITCH)),
 
+=======
+>>>>>>> refs/remotes/openhab-addons/main
             Map.entry(CHANNEL_VENTILATIONOPERATIONMODE,
                     new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_VENTILATIONOPERATIONMODE),
                             CoreItemFactory.STRING)),
@@ -587,6 +591,10 @@ public class EnOceanBindingConstants {
                             CoreItemFactory.NUMBER + ItemUtil.EXTENSION_SEPARATOR
                                     + Dimensionless.class.getSimpleName())),
 
+            Map.entry(CHANNEL_STATUS_REQUEST_EVENT,
+                    new EnOceanChannelDescription(new ChannelTypeUID(BINDING_ID, CHANNEL_STATUS_REQUEST_EVENT), null,
+                            "", false, true)),
+
             Map.entry(CHANNEL_REPEATERMODE, new EnOceanChannelDescription(
                     new ChannelTypeUID(BINDING_ID, CHANNEL_REPEATERMODE), CoreItemFactory.STRING)));
 
@@ -596,11 +604,8 @@ public class EnOceanBindingConstants {
     public static final String REPEATERMODE_LEVEL_2 = "LEVEL2";
 
     // Bridge config properties
-    public static final String SENDERID = "senderId";
     public static final String PATH = "path";
-    public static final String HOST = "host";
-    public static final String RS485 = "rs485";
-    public static final String NEXTSENDERID = "nextSenderId";
+    public static final String PARAMETER_NEXT_SENDERID = "nextSenderId";
 
     // Bridge properties
     public static final String PROPERTY_BASE_ID = "Base ID";
@@ -611,13 +616,12 @@ public class EnOceanBindingConstants {
     public static final String PROPERTY_DESCRIPTION = "Description";
 
     // Thing properties
-    public static final String PROPERTY_ENOCEAN_ID = "enoceanId";
+    public static final String PROPERTY_SENDINGENOCEAN_ID = "SendingEnoceanId";
 
     // Thing config parameter
     public static final String PARAMETER_SENDERIDOFFSET = "senderIdOffset";
     public static final String PARAMETER_SENDINGEEPID = "sendingEEPId";
     public static final String PARAMETER_RECEIVINGEEPID = "receivingEEPId";
-    public static final String PARAMETER_EEPID = "eepId";
 
     public static final String PARAMETER_BROADCASTMESSAGES = "broadcastMessages";
     public static final String PARAMETER_ENOCEANID = "enoceanId";

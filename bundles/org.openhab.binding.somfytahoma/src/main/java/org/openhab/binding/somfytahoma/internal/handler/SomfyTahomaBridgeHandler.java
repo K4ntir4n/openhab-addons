@@ -17,14 +17,18 @@ import static org.openhab.binding.somfytahoma.internal.SomfyTahomaBindingConstan
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
@@ -35,9 +39,25 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.binding.somfytahoma.internal.config.SomfyTahomaConfig;
 import org.openhab.binding.somfytahoma.internal.discovery.SomfyTahomaItemDiscoveryService;
-import org.openhab.binding.somfytahoma.internal.model.*;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaAction;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaActionGroup;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaApplyResponse;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaDevice;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaEvent;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaLoginResponse;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaRegisterEventsResponse;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaSetup;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaState;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaStatus;
+import org.openhab.binding.somfytahoma.internal.model.SomfyTahomaStatusResponse;
+import org.openhab.core.cache.ExpiringCache;
 import org.openhab.core.io.net.http.HttpClientFactory;
-import org.openhab.core.thing.*;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.binding.BaseBridgeHandler;
 import org.openhab.core.thing.binding.ThingHandlerService;
 import org.openhab.core.types.Command;
@@ -106,6 +126,11 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
      */
     private String eventsId = "";
 
+    private Map<String, SomfyTahomaDevice> devicePlaces = new HashMap<>();
+
+    private ExpiringCache<List<SomfyTahomaDevice>> cachedDevices = new ExpiringCache<>(Duration.ofSeconds(30),
+            this::getDevices);
+
     // Gson & parser
     private final Gson gson = new Gson();
 
@@ -141,9 +166,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
      */
     private void initPolling() {
         stopPolling();
-        pollFuture = scheduler.scheduleWithFixedDelay(() -> {
-            getTahomaUpdates();
-        }, 10, thingConfig.getRefresh(), TimeUnit.SECONDS);
+        scheduleGetUpdates(10);
 
         statusFuture = scheduler.scheduleWithFixedDelay(() -> {
             refreshTahomaStates();
@@ -154,10 +177,25 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
         }, RECONCILIATION_TIME, RECONCILIATION_TIME, TimeUnit.SECONDS);
     }
 
+    private void scheduleGetUpdates(long delay) {
+        pollFuture = scheduler.schedule(() -> {
+            getTahomaUpdates();
+            scheduleNextGetUpdates();
+        }, delay, TimeUnit.SECONDS);
+    }
+
+    private void scheduleNextGetUpdates() {
+        ScheduledFuture<?> localPollFuture = pollFuture;
+        if (localPollFuture != null) {
+            localPollFuture.cancel(false);
+        }
+        scheduleGetUpdates(executions.isEmpty() ? thingConfig.getRefresh() : 2);
+    }
+
     public synchronized void login() {
         String url;
 
-        if (StringUtils.isEmpty(thingConfig.getEmail()) || StringUtils.isEmpty(thingConfig.getPassword())) {
+        if (thingConfig.getEmail().isEmpty() || thingConfig.getPassword().isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "Can not access device as username and/or password are null");
             return;
@@ -322,13 +360,41 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
     }
 
     public @Nullable SomfyTahomaSetup getSetup() {
-        return invokeCallToURL(TAHOMA_API_URL + "setup", "", HttpMethod.GET, SomfyTahomaSetup.class);
+        SomfyTahomaSetup setup = invokeCallToURL(TAHOMA_API_URL + "setup", "", HttpMethod.GET, SomfyTahomaSetup.class);
+        if (setup != null) {
+            saveDevicePlaces(setup.getDevices());
+        }
+        return setup;
     }
 
     public List<SomfyTahomaDevice> getDevices() {
         SomfyTahomaDevice[] response = invokeCallToURL(SETUP_URL + "devices", "", HttpMethod.GET,
                 SomfyTahomaDevice[].class);
-        return response != null ? List.of(response) : List.of();
+        List<SomfyTahomaDevice> devices = response != null ? List.of(response) : List.of();
+        saveDevicePlaces(devices);
+        return devices;
+    }
+
+    public synchronized @Nullable SomfyTahomaDevice getCachedDevice(String url) {
+        List<SomfyTahomaDevice> devices = cachedDevices.getValue();
+        for (SomfyTahomaDevice device : devices) {
+            if (url.equals(device.getDeviceURL())) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    private void saveDevicePlaces(List<SomfyTahomaDevice> devices) {
+        devicePlaces.clear();
+        for (SomfyTahomaDevice device : devices) {
+            if (!device.getPlaceOID().isEmpty()) {
+                SomfyTahomaDevice newDevice = new SomfyTahomaDevice();
+                newDevice.setPlaceOID(device.getPlaceOID());
+                newDevice.setWidget(device.getWidget());
+                devicePlaces.put(device.getDeviceURL(), newDevice);
+            }
+        }
     }
 
     private void getTahomaUpdates() {
@@ -541,7 +607,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
             throws InterruptedException, ExecutionException, TimeoutException {
         logger.trace("Sending {} to url: {} with data: {}", method.asString(), url, urlParameters);
         Request request = sendRequestBuilder(url, method);
-        if (StringUtils.isNotEmpty(urlParameters)) {
+        if (!urlParameters.isEmpty()) {
             request = request.content(new StringContentProvider(urlParameters), "application/json;charset=UTF-8");
         }
 
@@ -585,9 +651,9 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
     }
 
     private boolean sendCommandInternal(String io, String command, String params, String url) {
-        String value = params.equals("[]") ? command : params.replace("\"", "");
+        String value = params.equals("[]") ? command : command + " " + params.replace("\"", "");
         String urlParameters = "{\"label\":\"" + getThingLabelByURL(io) + " - " + value
-                + " - OH2\",\"actions\":[{\"deviceURL\":\"" + io + "\",\"commands\":[{\"name\":\"" + command
+                + " - openHAB\",\"actions\":[{\"deviceURL\":\"" + io + "\",\"commands\":[{\"name\":\"" + command
                 + "\",\"parameters\":" + params + "}]}]}";
         SomfyTahomaApplyResponse response = invokeCallToURL(url, urlParameters, HttpMethod.POST,
                 SomfyTahomaApplyResponse.class);
@@ -595,6 +661,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
             if (!response.getExecId().isEmpty()) {
                 logger.debug("Exec id: {}", response.getExecId());
                 registerExecution(io, response.getExecId());
+                scheduleNextGetUpdates();
             } else {
                 logger.debug("ExecId is empty!");
                 return false;
@@ -615,6 +682,20 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
         }, thingConfig.getRetryDelay(), TimeUnit.MILLISECONDS));
     }
 
+    public void sendCommandToSameDevicesInPlace(String io, String command, String params, String url) {
+        SomfyTahomaDevice device = devicePlaces.get(io);
+        if (device != null && !device.getPlaceOID().isEmpty()) {
+            devicePlaces.forEach((deviceUrl, devicePlace) -> {
+                if (device.getPlaceOID().equals(devicePlace.getPlaceOID())
+                        && device.getWidget().equals(devicePlace.getWidget())) {
+                    sendCommand(deviceUrl, command, params, url);
+                }
+            });
+        } else {
+            sendCommand(io, command, params, url);
+        }
+    }
+
     private String getThingLabelByURL(String io) {
         Thing th = getThingByDeviceUrl(io);
         if (th != null) {
@@ -622,7 +703,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
                 // Return label from Tahoma
                 return th.getProperties().get(NAME_STATE).replace("\"", "");
             }
-            // Return label from OH2
+            // Return label from the thing
             String label = th.getLabel();
             return label != null ? label.replace("\"", "") : "";
         }
@@ -650,6 +731,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
         }
         if (execId != null) {
             registerExecution(id, execId);
+            scheduleNextGetUpdates();
         }
     }
 
